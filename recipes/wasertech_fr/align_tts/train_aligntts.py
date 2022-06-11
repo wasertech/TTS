@@ -16,6 +16,10 @@ if not os.path.exists(output_path):
 
 mailabs_path = "/mnt/extracted/M-AILABS/fr_FR"
 
+if not os.path.exists(mailabs_path):
+    print(f"ERROR: M-AILABS not present in: {mailabs_path}")
+    sys.exit(1)
+
 # init configs
 mailabs_dataset_config = [BaseDatasetConfig(name="mailabs", meta_file_train=None, path=mailabs_path, language="fr_FR")]
 
