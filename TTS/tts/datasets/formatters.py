@@ -5,11 +5,40 @@ from glob import glob
 from pathlib import Path
 from typing import List
 
+import pandas as pd
 from tqdm import tqdm
 
 ########################
 # DATASETS
 ########################
+
+
+def coqui(root_path, meta_file, ignored_speakers=None):
+    """Interal dataset formatter."""
+    metadata = pd.read_csv(os.path.join(root_path, meta_file), sep="|")
+    assert all(x in metadata.columns for x in ["audio_file", "text"])
+    speaker_name = None if "speaker_name" in metadata.columns else "coqui"
+    emotion_name = None if "emotion_name" in metadata.columns else "neutral"
+    items = []
+    not_found_counter = 0
+    for row in metadata.itertuples():
+        if speaker_name is None and ignored_speakers is not None and row.speaker_name in ignored_speakers:
+            continue
+        audio_path = os.path.join(root_path, row.audio_file)
+        if not os.path.exists(audio_path):
+            not_found_counter += 1
+            continue
+        items.append(
+            {
+                "text": row.text,
+                "audio_file": audio_path,
+                "speaker_name": speaker_name if speaker_name is not None else row.speaker_name,
+                "emotion_name": emotion_name if emotion_name is not None else row.emotion_name,
+            }
+        )
+    if not_found_counter > 0:
+        print(f" | > [!] {not_found_counter} files not found")
+    return items
 
 
 def tweb(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
@@ -138,6 +167,21 @@ def ljspeech_test(root_path, meta_file, **kwargs):  # pylint: disable=unused-arg
             wav_file = os.path.join(root_path, "wavs", cols[0] + ".wav")
             text = cols[2]
             items.append({"text": text, "audio_file": wav_file, "speaker_name": f"ljspeech-{speaker_id}"})
+    return items
+
+
+def thorsten(root_path, meta_file, **kwargs):  # pylint: disable=unused-argument
+    """Normalizes the thorsten meta data file to TTS format
+    https://github.com/thorstenMueller/deep-learning-german-tts/"""
+    txt_file = os.path.join(root_path, meta_file)
+    items = []
+    speaker_name = "thorsten"
+    with open(txt_file, "r", encoding="utf-8") as ttf:
+        for line in ttf:
+            cols = line.split("|")
+            wav_file = os.path.join(root_path, "wavs", cols[0] + ".wav")
+            text = cols[1]
+            items.append({"text": text, "audio_file": wav_file, "speaker_name": speaker_name})
     return items
 
 
