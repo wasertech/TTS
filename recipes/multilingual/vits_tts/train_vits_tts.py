@@ -15,7 +15,7 @@ from TTS.utils.audio import AudioProcessor
 
 output_path = os.path.dirname(os.path.abspath(__file__))
 
-mailabs_path = "/home/julian/workspace/mailabs/**"
+mailabs_path = "/mnt/Données II/Données/TTS/data/extracted/M-AILABS/**"
 dataset_paths = glob(mailabs_path)
 dataset_config = [
     BaseDatasetConfig(name="mailabs", meta_file_train=None, path=path, language=path.split("/")[-1])

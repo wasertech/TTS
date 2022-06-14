@@ -7,19 +7,19 @@ from TTS.vocoder.configs import HifiganConfig
 from TTS.vocoder.datasets.preprocess import load_wav_data
 from TTS.vocoder.models.gan import GAN
 
-output_path = "/mnt/models/HifiGAN"
+output_path = os.path.dirname(os.path.abspath(__file__))
 
 if not os.path.exists(output_path):
     os.makedirs(output_path)
 
-voice_wav_path = "/mnt/extracted/M-AILABS/fr_FR/female/ezwa/monsieur_lecoq/wavs/"
+voice_wav_path = "/mnt/Données II/Données/TTS/data/extracted/M-AILABS/fr_FR/female/ezwa/monsieur_lecoq/wavs/"
 
 if not os.path.exists(voice_wav_path):
     print(f"ERROR: Path to wav for voice not present in: {voice_wav_path}")
     sys.exit(1)
 
 config = HifiganConfig(
-    batch_size=32,
+    batch_size=166,
     eval_batch_size=16,
     num_loader_workers=4,
     num_eval_loader_workers=4,
