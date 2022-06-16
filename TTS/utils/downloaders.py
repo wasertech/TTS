@@ -1,4 +1,4 @@
-import os
+import os, sys
 from typing import Optional
 
 from TTS.utils.download import download_kaggle_dataset, download_url, extract_archive
@@ -117,6 +117,42 @@ def download_mailabs(path: str, language: str = "english"):
         "italian": "https://data.solak.de/data/Training/stt_tts/it_IT.tgz",
         "spanish": "https://data.solak.de/data/Training/stt_tts/es_ES.tgz",
     }
+    os.makedirs(path, exist_ok=True)
+    url = language_dict[language]
+    download_url(url, path)
+    basename = os.path.basename(url)
+    archive = os.path.join(path, basename)
+    print(" > Extracting archive file...")
+    extract_archive(archive)
+
+def download_mls(path: str, language: str = "english"):
+    """Download and extract Mailabs dataset.
+
+    Args:
+        path (str): Path to the directory where the dataset will be stored.
+
+        language (str): Language subset to download. Defaults to english.
+    """
+    base_slr_url = "https://dl.fbaipublicfiles.com/mls/"
+    language_list  = [
+        "english",
+        "german",
+        "french",
+        "dutch",
+        "spanish",
+        "italian",
+        "portuguese",
+        "polish",
+    ]
+    if language not in language_list:
+        print("Select language from:")
+        print(language_list)
+        sys.exit(1)
+    
+    language_dict = {}
+    for l in language_list:
+        language_dict[l] = f"{base_slr_url}mls_{l}_opus.tar.gz" 
+
     os.makedirs(path, exist_ok=True)
     url = language_dict[language]
     download_url(url, path)

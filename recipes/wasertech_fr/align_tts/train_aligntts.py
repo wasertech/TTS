@@ -15,6 +15,7 @@ if not os.path.exists(output_path):
     os.makedirs(output_path, exist_ok=True)
 
 mailabs_path = os.path.join(output_path, "extracted/M-AILABS/fr_FR_22.05K/")
+mls_path = os.path.join(output_path, "extracted/MLS/mls_french_wav_22.05K/",)
 
 if not os.path.exists(mailabs_path):
     print(f"ERROR: M-AILABS not present in: {mailabs_path}")
