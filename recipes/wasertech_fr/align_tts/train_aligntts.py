@@ -28,7 +28,7 @@ if not os.path.exists(mls_path):
 
 # init configs
 mailabs_dataset_config = BaseDatasetConfig(name="mailabs", meta_file_train=None, path=mailabs_path, language="fr_FR", meta_file_val=None)
-mls_dataset_config = BaseDatasetConfig(name="mls", path=mls_path, meta_file_train="train/transcripts.txt", language="french", meta_file_val="dev/transcripts.txt")
+mls_dataset_config = BaseDatasetConfig(name="mls", path=mls_path, meta_file_train="train/transcripts_punctuated.txt", language="french", meta_file_val="dev/transcripts_punctuated.txt")
 
 config = AlignTTSConfig(
     batch_size=32,
@@ -58,8 +58,6 @@ ap = AudioProcessor.init_from_config(config)
 # Tokenizer is used to convert text to sequences of token IDs.
 # If characters are not defined in the config, default characters are passed to the config
 tokenizer, config = TTSTokenizer.init_from_config(config)
-
-tokenizer.use_eos_bos = True
 
 # LOAD DATA SAMPLES
 # Each sample is a list of ```[text, audio_file_path, speaker_name]```
