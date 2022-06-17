@@ -11,10 +11,14 @@ from TTS.tts.models.align_tts import AlignTTS
 from TTS.tts.utils.text.tokenizer import TTSTokenizer
 from TTS.utils.audio import AudioProcessor
 
-# | > Max audio length: 526589.0
-# | > Min audio length: 25216.0
-MAX_AUDIO_LENGTH = 200*1000 #3.34 minutes max
+# | > Max audio length: 526589.0 (<9 min)
+# | > Min audio length: 25216.0  (>25 seconds)
+miliseconds=1.
+seconds=float(1000*miliseconds)
+MAX_AUDIO_LENGTH = float(200*seconds) #200 seconds (3.34 minutes max)
+
 output_path = "/mnt/Données II/Données/TTS/data/" # os.path.dirname(os.path.abspath(__file__))
+
 if not os.path.exists(output_path):
     os.makedirs(output_path, exist_ok=True)
 
@@ -86,8 +90,6 @@ mls_train_samples, mls_eval_samples = load_tts_samples(
 
 train_samples = mailabs_train_samples + mls_train_samples
 eval_samples = mailabs_eval_samples + mls_eval_samples
-
-
 
 # init model
 model = AlignTTS(config, ap, tokenizer)
