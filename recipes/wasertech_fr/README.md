@@ -13,7 +13,7 @@ For running the recipes
 	sample_rate=22050
 	mailabs_path=path/to/M_AILABS/fr_FR
 	echo "Converting wav files to ${sample_rate} Hz WAV using ${n} processes." && \
-	find . -type f -name "*.wav" -print0 | parallel -0 --eta -j $n mv {} {}_ && ffmpeg -loglevel 0 -n -i {}_ -ar ${sample_rate} -ac 1 {} && rm {}_ && \
+	find . -type f -name "*.wav" -print0 | parallel -0 --eta -j $n mv {} {}_ && ffmpeg -loglevel 0 -n -i {}_ -ar ${sample_rate} -ac 1 {} && \rm {}_ && \
 	mv -f $mailabs_path "${mailabs_path}_${sample_rate}" && \
 	echo "Archiving dataset to save time." && \
 	tar cf - "${mailabs_path}_${sample_rate}" | pigz > "${mailabs_path}_${sample_rate}.zip" && \

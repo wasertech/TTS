@@ -5,7 +5,8 @@ from trainer import Trainer, TrainerArgs
 from TTS.tts.configs.align_tts_config import AlignTTSConfig
 from TTS.tts.configs.shared_configs import BaseDatasetConfig
 from TTS.tts.datasets import load_tts_samples
-from TTS.tts.datasets.formatters import mailabs as mailabs_formatter
+from TTS.tts.datasets.formatters import mailabs as mailabs_formater
+from TTS.tts.datasets.formatters import mls as mls_formater
 from TTS.tts.models.align_tts import AlignTTS
 from TTS.tts.utils.text.tokenizer import TTSTokenizer
 from TTS.utils.audio import AudioProcessor
@@ -15,17 +16,22 @@ if not os.path.exists(output_path):
     os.makedirs(output_path, exist_ok=True)
 
 mailabs_path = os.path.join(output_path, "extracted/M-AILABS/fr_FR_22.05K/")
-mls_path = os.path.join(output_path, "extracted/MLS/mls_french_wav_22.05K/",)
+mls_path = os.path.join(output_path, "extracted/MLS/mls_french_wav_22.05K/")
 
 if not os.path.exists(mailabs_path):
     print(f"ERROR: M-AILABS not present in: {mailabs_path}")
     sys.exit(1)
 
+if not os.path.exists(mls_path):
+    print(f"ERROR: MLS not present in: {mls_path}")
+    sys.exit(1)
+
 # init configs
 mailabs_dataset_config = BaseDatasetConfig(name="mailabs", meta_file_train=None, path=mailabs_path, language="fr_FR", meta_file_val=None)
+mls_dataset_config = BaseDatasetConfig(name="mls", path=mls_path, meta_file_train="train/transcripts.txt", language="french", meta_file_val="dev/transcripts.txt")
 
 config = AlignTTSConfig(
-    batch_size=16,
+    batch_size=32,
     eval_batch_size=16,
     num_loader_workers=4,
     num_eval_loader_workers=4,
@@ -40,7 +46,7 @@ config = AlignTTSConfig(
     print_eval=True,
     mixed_precision=False,
     output_path=os.path.join(output_path, "models/AlignTTS/"),
-    datasets=[mailabs_dataset_config],
+    datasets=[mailabs_dataset_config, mls_dataset_config],
 )
 
 # INITIALIZE THE AUDIO PROCESSOR
@@ -58,13 +64,24 @@ tokenizer, config = TTSTokenizer.init_from_config(config)
 # You can define your custom sample loader returning the list of samples.
 # Or define your custom formatter and pass it to the `load_tts_samples`.
 # Check `TTS.tts.datasets.load_tts_samples` for more details.
-train_samples, eval_samples = load_tts_samples(
+mailabs_train_samples, mailabs_eval_samples = load_tts_samples(
     mailabs_dataset_config,
     eval_split=True,
     eval_split_max_size=config.eval_split_max_size,
     eval_split_size=config.eval_split_size,
-    formatter=mailabs_formatter
+    formatter=mailabs_formater
 )
+
+mls_train_samples, mls_eval_samples = load_tts_samples(
+    mls_dataset_config,
+    eval_split=True,
+    eval_split_max_size=config.eval_split_max_size,
+    eval_split_size=config.eval_split_size,
+    formatter=mls_formater,
+)
+
+train_samples = mailabs_train_samples + mls_train_samples
+eval_samples = mailabs_eval_samples + mls_eval_samples
 
 # init model
 model = AlignTTS(config, ap, tokenizer)
