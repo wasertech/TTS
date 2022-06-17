@@ -4,8 +4,10 @@ For running the recipes
 
 1. Download french data
 
+	You need `parallel`, `pigz`, `pxz`, `rsync` and `ffmpeg` to efficiently convert large datasets. You'll thank me later.
+
 	- M-AILABS dataset can be downloaded either manually from [its official website](https://www.caito.de/2019/01/03/the-m-ailabs-speech-dataset/) or using ```download_mailabs_fr.sh [PATH_TO_MAILABS]```.
-	Mailabs' sample rate is 16K Hz which too low for most TTS application. You need to upsample the dataset.
+	M-AI Labs' sample rate is 16K Hz which too low for most TTS application. You need to upsample the dataset.
 	
 	_i.e. with a sample rate of 22.05K Hz._
 	```bash
@@ -21,7 +23,7 @@ For running the recipes
 	echo "Conversion stopped without finishing."
 	```
 
-	- MLS dataset can be downloaded on [OpenSLR.org](http://www.openslr.org/94/) or using `download_mls_fr.sh [PATH_TO_MLS]`.
+	- The Multilingual-LibriSpeech (MLS) dataset can be downloaded on [OpenSLR.org](http://www.openslr.org/94/) or using `download_mls_fr.sh [PATH_TO_MLS]`.
 	MLS is formatted using the opus format so we need to convert it to wav.
 	
 	```bash
@@ -37,12 +39,43 @@ For running the recipes
 	cd ${opus_path} && find . -name "*.wav" -delete && \
 	cd ../../${wav_path} && find . -name "*.opus" -delete && \
 	echo "Archiving dataset to save time." && cd ../.. && \
-	tar cf - "${wav_path}" | pigz > mls_french_wav_${sample_rate}.zip && \
+	tar cf - mls_french_wav_${sample_rate} | pxz -c -T0 > mls_french_wav_${sample_rate}.tar.xz && \
 	echo "Everything is done." || \
 	echo "Conversion stopped without finishing."
 	```
 
-	You need `parallel`, `pigz`, `rsync` and `ffmpeg` to efficiently convert large datasets. You'll thank me later.
+	MLS doesn't support ponctuation unfortunately. So we'll use a transformer to restore it.
+
+	Install `deepmultilingualpunctuation` and `sentencepiece` using PIP and run the following script in the parent directory of `mls_french_wav_*`.
+
+	```python3
+	#!/usr/bin/env python3
+
+	from deepmultilingualpunctuation import PunctuationModel
+	from glob import glob
+
+	model = PunctuationModel()
+
+	mls_path = "mls_french_wav_*/" # Change this for your language
+	text_file_list = glob(f"{mls_path}/*/transcripts.txt")
+
+	split_char = "	"
+
+	for text_file_path in text_file_list:
+		print(f"Processing {text_file_path}")
+		punctuated_transcripts = []
+		with open(text_file_path, 'r') as text_file:
+			text_list = text_file.readlines()
+			for text in text_list:
+				s_idx, _text = text.split(split_char)
+				clean_text = model.restore_punctuation(_text)
+				transcript_line = f"{s_idx}{split_char}{clean_text}"
+				punctuated_transcripts.append(transcript_line)
+		punctuated_text_file_path = text_file_path.replace(".txt", "_punctuated.txt")
+		with open(punctuated_text_file_path, 'w') as f:
+			for t in punctuated_transcripts:
+				f.write("%s\n" % t)
+	```
 
 2. Navigate to your desired model folder and run the training.
 

@@ -59,6 +59,8 @@ ap = AudioProcessor.init_from_config(config)
 # If characters are not defined in the config, default characters are passed to the config
 tokenizer, config = TTSTokenizer.init_from_config(config)
 
+tokenizer.use_eos_bos = True
+
 # LOAD DATA SAMPLES
 # Each sample is a list of ```[text, audio_file_path, speaker_name]```
 # You can define your custom sample loader returning the list of samples.
@@ -82,6 +84,8 @@ mls_train_samples, mls_eval_samples = load_tts_samples(
 
 train_samples = mailabs_train_samples + mls_train_samples
 eval_samples = mailabs_eval_samples + mls_eval_samples
+
+
 
 # init model
 model = AlignTTS(config, ap, tokenizer)
