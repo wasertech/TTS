@@ -11,6 +11,9 @@ from TTS.tts.models.align_tts import AlignTTS
 from TTS.tts.utils.text.tokenizer import TTSTokenizer
 from TTS.utils.audio import AudioProcessor
 
+# | > Max audio length: 526589.0
+# | > Min audio length: 25216.0
+MAX_AUDIO_LENGTH = 200*1000 #3.34 minutes max
 output_path = "/mnt/Données II/Données/TTS/data/" # os.path.dirname(os.path.abspath(__file__))
 if not os.path.exists(output_path):
     os.makedirs(output_path, exist_ok=True)
@@ -47,6 +50,7 @@ config = AlignTTSConfig(
     mixed_precision=False,
     output_path=os.path.join(output_path, "models/AlignTTS/"),
     datasets=[mailabs_dataset_config, mls_dataset_config],
+    max_audio_len=MAX_AUDIO_LENGTH
 )
 
 # INITIALIZE THE AUDIO PROCESSOR
