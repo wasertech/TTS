@@ -77,16 +77,33 @@ For running the recipes
 				f.write("%s\n" % t)
 	```
 
-2. Navigate to your desired model folder and run the training.
+2. Train a TTS model for your French variant.
 
-    Running Python files. (Choose the desired GPU ID for your run and set ```CUDA_VISIBLE_DEVICES```)
-    ```terminal
-    CUDA_VISIBLE_DEVICES="0" python train_modelX.py
+    To train AlignTTS on French we need to install `espeak` or `espeak-ng`.
+
+	You can choose between the availible flavors;
+	```bash
+	❯ espeak --voices | grep fr-
+	5  fr-be           --/M      French_(Belgium)   roa/fr-BE            (fr 8)
+	5  fr-ch           --/M      French_(Switzerland) roa/fr-CH            (fr 8)
+	5  fr-fr           --/M      French_(France)    roa/fr               (fr 5)
+	```
+
+	To set `phoneme_language` in the configuration of AlignTTS.
+
+	Then start a training session by distributing the work.
+
+    ```bash
+    ❯ python -m trainer.distribute --script recipes/wasertech_fr/align_tts/train_aligntts.py --gpus "0,1"
     ```
 
-    Running bash scripts.
-    ```terminal
-    bash run.sh
+3. Train a vocoder
+
+	If you want to change the speaker's voice, you need to point HiFiGAN's `data_path` to a directory containing audio of the same speaker.
+
+	Distribute the load using:
+    ```bash
+    ❯ python -m trainer.distribute --script recipes/wasertech_fr/hifigan/train_hifigan.py --gpus "0,1"
     ```
 
 💡 Note that these runs are just templates to help you start training your first model. They are not optimized for the best
